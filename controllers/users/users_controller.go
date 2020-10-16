@@ -34,7 +34,6 @@ func Create(c *gin.Context) {
 
 	if err = c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  http.StatusBadRequest,
 			"message": "Invalid JSON body",
 			"error":   err.Error(),
 			"data":    nil,
@@ -45,8 +44,7 @@ func Create(c *gin.Context) {
 	result, err = services.UsersService.CreateUser(user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  http.StatusBadRequest,
-			"message": "ERROR MESSAGE PLACEHOLDER",
+			"message": "User creation failed",
 			"error":   err.Error(),
 			"data":    nil,
 		})
@@ -54,9 +52,8 @@ func Create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"status":  http.StatusCreated,
-		"message": "SUCCESS MESSAGE PLACEHOLDER",
-		"error":   "null",
+		"message": "User creation successful",
+		"error":   nil,
 		"data":    result,
 	})
 }
@@ -70,8 +67,7 @@ func Get(c *gin.Context) {
 	userID, err = getUserID(c.Param("user_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  http.StatusBadRequest,
-			"message": "ERROR MESSAGE PLACEHOLDER",
+			"message": "Failed to parse user ID",
 			"error":   err.Error(),
 			"data":    nil,
 		})
@@ -81,8 +77,7 @@ func Get(c *gin.Context) {
 	user, err = services.UsersService.GetUser(userID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"status":  http.StatusNotFound,
-			"message": "ERROR MESSAGE PLACEHOLDER",
+			"message": "Failed to retrieve a user",
 			"error":   err.Error(),
 			"data":    nil,
 		})
@@ -90,9 +85,8 @@ func Get(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"status":  http.StatusOK,
-		"message": "SUCCESS MESSAGE PLACEHOLDER",
-		"error":   "null",
+		"message": "User successfully retrieved",
+		"error":   nil,
 		"data":    user,
 	})
 }
@@ -106,8 +100,7 @@ func Update(c *gin.Context) {
 	userID, err := getUserID(c.Param("user_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  http.StatusBadRequest,
-			"message": "ERROR MESSAGE PLACEHOLDER",
+			"message": "Failed to parse user ID",
 			"error":   err.Error(),
 			"data":    nil,
 		})
@@ -116,7 +109,6 @@ func Update(c *gin.Context) {
 
 	if err = c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  http.StatusBadRequest,
 			"message": "Invalid JSON body",
 			"error":   err.Error(),
 			"data":    nil,
@@ -131,17 +123,15 @@ func Update(c *gin.Context) {
 	result, err := services.UsersService.UpdateUser(isPartial, user)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  http.StatusBadRequest,
-			"message": "ERROR MESSAGE PLACEHOLDER",
+			"message": "Failed to update user",
 			"error":   err.Error(),
 			"data":    nil,
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"status":  http.StatusOK,
-		"message": "SUCCESS MESSAGE PLACEHOLDER",
-		"error":   "null",
+		"message": "User updated successfully",
+		"error":   nil,
 		"data":    result,
 	})
 }
@@ -153,8 +143,7 @@ func Delete(c *gin.Context) {
 	userID, err := getUserID(c.Param("user_id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  http.StatusBadRequest,
-			"message": "ERROR MESSAGE PLACEHOLDER",
+			"message": "Failed to parse user ID",
 			"error":   err.Error(),
 			"data":    nil,
 		})
@@ -162,17 +151,15 @@ func Delete(c *gin.Context) {
 	}
 	if err := services.UsersService.DeleteUser(userID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  http.StatusBadRequest,
-			"message": "ERROR MESSAGE PLACEHOLDER",
+			"message": "Failed to delete user",
 			"error":   err.Error(),
 			"data":    nil,
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"status":  http.StatusOK,
-		"message": "SUCCESS MESSAGE PLACEHOLDER",
-		"error":   "null",
+		"message": "User successfully deleted",
+		"error":   nil,
 		"data":    nil,
 	})
 }
@@ -182,18 +169,16 @@ func Search(c *gin.Context) {
 	status := c.Query("status")
 	users, err := services.UsersService.SearchUsers(status)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status":  http.StatusBadRequest,
-			"message": "ERROR MESSAGE PLACEHOLDER",
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "Users are not found",
 			"error":   err.Error(),
 			"data":    nil,
 		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"status":  http.StatusOK,
-		"message": "SUCCESS MESSAGE PLACEHOLDER",
-		"error":   "null",
+		"message": "Users were successfully found",
+		"error":   nil,
 		"data":    users,
 	})
 }
