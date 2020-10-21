@@ -6,6 +6,7 @@ import (
 
 	"github.com/JohanVong/GoAPI_beginner/domain/users"
 	"github.com/JohanVong/GoAPI_beginner/services"
+	"github.com/JohanVong/GoAPI_beginner/utils/errors"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,10 +27,11 @@ func getUserID(userIDParam string) (int64, error) {
 	return userID, nil
 }
 
-// Create item in database
-func Create(c *gin.Context) {
+// CreateUser user in database
+func CreateUser(c *gin.Context) {
 	var user users.User
 	var err error
+	var customError *errors.CustomError
 	var result *users.User
 
 	if err = c.ShouldBindJSON(&user); err != nil {
@@ -41,11 +43,11 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	result, err = services.UsersService.CreateUser(user)
-	if err != nil {
+	result, customError = services.UsersService.CreateUser(user)
+	if customError != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "User creation failed",
-			"error":   err.Error(),
+			"message": "Error on user creation",
+			"error":   customError.Error,
 			"data":    nil,
 		})
 		return
@@ -54,13 +56,14 @@ func Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "User creation successful",
 		"error":   nil,
-		"data":    result,
+		"data":    result.Marshall(c.GetHeader("X-Private") == "true"),
 	})
 }
 
-// Get is used to get info about item
-func Get(c *gin.Context) {
+// GetUser is used to get info about user
+func GetUser(c *gin.Context) {
 	var err error
+	var customError *errors.CustomError
 	var userID int64
 	var user *users.User
 
@@ -74,11 +77,11 @@ func Get(c *gin.Context) {
 		return
 	}
 
-	user, err = services.UsersService.GetUser(userID)
-	if err != nil {
+	user, customError = services.UsersService.GetUser(userID)
+	if customError != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "Failed to retrieve a user",
-			"error":   err.Error(),
+			"error":   customError.Error,
 			"data":    nil,
 		})
 		return
@@ -87,15 +90,15 @@ func Get(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User successfully retrieved",
 		"error":   nil,
-		"data":    user,
+		"data":    user.Marshall(c.GetHeader("X-Private") == "true"),
 	})
 }
 
-// Update is used to alter item
-// partially or completely
-func Update(c *gin.Context) {
+// UpdateUser is used to alter user
+func UpdateUser(c *gin.Context) {
 	var user users.User
 	var err error
+	var customError *errors.CustomError
 
 	userID, err := getUserID(c.Param("user_id"))
 	if err != nil {
@@ -118,13 +121,11 @@ func Update(c *gin.Context) {
 
 	user.ID = userID
 
-	isPartial := c.Request.Method == http.MethodPatch
-
-	result, err := services.UsersService.UpdateUser(isPartial, user)
-	if err != nil {
+	result, customError := services.UsersService.UpdateUser(user)
+	if customError != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Failed to update user",
-			"error":   err.Error(),
+			"error":   customError.Error,
 			"data":    nil,
 		})
 		return
@@ -132,13 +133,14 @@ func Update(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "User updated successfully",
 		"error":   nil,
-		"data":    result,
+		"data":    result.Marshall(c.GetHeader("X-Private") == "true"),
 	})
 }
 
-// Delete is used to remove items from database
-func Delete(c *gin.Context) {
+// DeleteUser is used to remove user from database
+func DeleteUser(c *gin.Context) {
 	var err error
+	var customError *errors.CustomError
 
 	userID, err := getUserID(c.Param("user_id"))
 	if err != nil {
@@ -149,10 +151,10 @@ func Delete(c *gin.Context) {
 		})
 		return
 	}
-	if err := services.UsersService.DeleteUser(userID); err != nil {
+	if customError = services.UsersService.DeleteUser(userID); customError != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Failed to delete user",
-			"error":   err.Error(),
+			"error":   customError.Error,
 			"data":    nil,
 		})
 		return
@@ -164,21 +166,25 @@ func Delete(c *gin.Context) {
 	})
 }
 
-// Search is used to find items by Query param
-func Search(c *gin.Context) {
+// SearchUsersByStatus is used to find users by Query param
+func SearchUsersByStatus(c *gin.Context) {
+	var customError *errors.CustomError
+	var users users.Users
 	status := c.Query("status")
-	users, err := services.UsersService.SearchUsers(status)
-	if err != nil {
+
+	users, customError = services.UsersService.FindUsersByStatus(status)
+	if customError != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": "Users are not found",
-			"error":   err.Error(),
+			"error":   customError.Error,
 			"data":    nil,
 		})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Users were successfully found",
 		"error":   nil,
-		"data":    users,
+		"data":    users.Marshall(c.GetHeader("X-Private") == "true"),
 	})
 }

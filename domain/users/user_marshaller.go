@@ -4,7 +4,7 @@ import "encoding/json"
 
 // PublicUser is public info
 type PublicUser struct {
-	ID          int64  `json:"id"`
+	Username    string `json:"username"`
 	DateCreated string `json:"date_created"`
 	Status      string `json:"status"`
 }
@@ -12,6 +12,7 @@ type PublicUser struct {
 // PrivateUser is for authenticated user
 type PrivateUser struct {
 	ID          int64  `json:"id"`
+	Username    string `json:"username"`
 	Firstname   string `json:"firstname"`
 	Lastname    string `json:"lastname"`
 	Email       string `json:"email"`
@@ -20,25 +21,26 @@ type PrivateUser struct {
 }
 
 // Marshall for array of User
-func (users Users) Marshall(isPublic bool) []interface{} {
+func (users Users) Marshall(isPrivate bool) []interface{} {
 	result := make([]interface{}, len(users))
 	for index, user := range users {
-		result[index] = user.Marshall(isPublic)
+		result[index] = user.Marshall(isPrivate)
 	}
 	return result
 }
 
 // Marshall determines what type of user to return
-func (user *User) Marshall(isPublic bool) interface{} {
-	if isPublic {
-		return PublicUser{
-			ID:          user.ID,
-			DateCreated: user.DateCreated,
-			Status:      user.Status,
-		}
-	}
+func (user *User) Marshall(isPrivate bool) interface{} {
+	var privateUser PrivateUser
+	var publicUser PublicUser
+
 	userJSON, _ := json.Marshal(user)
-	var privateUSER PrivateUser
-	json.Unmarshal(userJSON, &privateUSER) // Unmarshal(кого, куда)
-	return privateUSER
+	json.Unmarshal(userJSON, &privateUser) // Unmarshal(кого, куда)
+	json.Unmarshal(userJSON, &publicUser)
+
+	if isPrivate {
+		return privateUser
+	}
+
+	return publicUser
 }
