@@ -14,7 +14,7 @@ const (
 
 // User model
 type User struct {
-	ID          int64  `json:"id"`
+	ID          uint   `json:"id"`
 	Username    string `json:"username"`
 	Firstname   string `json:"firstname"`
 	Lastname    string `json:"lastname"`
@@ -22,6 +22,7 @@ type User struct {
 	DateCreated string `json:"date_created"`
 	Status      string `json:"status"`
 	Password    string `json:"password"`
+	IsAdmin     bool   `json:"is_admin"`
 }
 
 // Users for array of User

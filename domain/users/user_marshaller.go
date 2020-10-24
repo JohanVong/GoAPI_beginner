@@ -18,6 +18,7 @@ type PrivateUser struct {
 	Email       string `json:"email"`
 	DateCreated string `json:"date_created"`
 	Status      string `json:"status"`
+	IsAdmin     bool   `json:"is_admin"`
 }
 
 // Marshall for array of User

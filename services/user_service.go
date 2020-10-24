@@ -16,15 +16,16 @@ var (
 type usersService struct{}
 
 type usersServiceInterface interface {
-	GetUser(int64) (*users.User, *errors.CustomError)
+	GetUserByID(uint) (*users.User, *errors.CustomError)
+	GetUserByMailAndPass(email string, password string) (*users.User, *errors.CustomError)
 	CreateUser(users.User) (*users.User, *errors.CustomError)
 	UpdateUser(users.User) (*users.User, *errors.CustomError)
-	DeleteUser(int64) *errors.CustomError
+	DeleteUser(uint) *errors.CustomError
 	FindUsersByStatus(string) (users.Users, *errors.CustomError)
 }
 
-// GetUser goes to Get() in Data Access Object '_dao' file
-func (s *usersService) GetUser(userID int64) (*users.User, *errors.CustomError) {
+// GetUserByID returns user by ID
+func (s *usersService) GetUserByID(userID uint) (*users.User, *errors.CustomError) {
 	var customError *errors.CustomError
 	user := &users.User{ID: userID}
 
@@ -34,8 +35,19 @@ func (s *usersService) GetUser(userID int64) (*users.User, *errors.CustomError) 
 	return user, nil
 }
 
-// CreateUser fills our struct with data via Save()
-// in Data Access Object '_dao' file
+// GetUserByMailAndPass returns user by email and password
+func (s *usersService) GetUserByMailAndPass(email string, password string) (*users.User, *errors.CustomError) {
+	var customError *errors.CustomError
+	user := &users.User{Email: email, Password: crypting.GetMd5(password)}
+
+	if customError = user.GetByCredentials(); customError != nil {
+		return nil, customError
+	}
+	return user, nil
+}
+
+// CreateUser takes user data from controller and
+// inserts this data via the database object file
 func (s *usersService) CreateUser(user users.User) (*users.User, *errors.CustomError) {
 	var customError *errors.CustomError
 
@@ -46,6 +58,7 @@ func (s *usersService) CreateUser(user users.User) (*users.User, *errors.CustomE
 	user.Status = users.StatusActive
 	user.DateCreated = dateutil.GetNowDBFormat()
 	user.Password = crypting.GetMd5(user.Password)
+	user.IsAdmin = false
 
 	if customError = user.Insert(); customError != nil {
 		return nil, customError
@@ -62,7 +75,7 @@ func (s *usersService) UpdateUser(user users.User) (*users.User, *errors.CustomE
 		return nil, customError
 	}
 
-	oldUser, customError := s.GetUser(user.ID)
+	oldUser, customError := s.GetUserByID(user.ID)
 	if customError != nil {
 		return nil, customError
 	}
@@ -91,7 +104,7 @@ func (s *usersService) UpdateUser(user users.User) (*users.User, *errors.CustomE
 }
 
 // DeleteUser removes user via Delete() in '_dao' file
-func (s *usersService) DeleteUser(userID int64) *errors.CustomError {
+func (s *usersService) DeleteUser(userID uint) *errors.CustomError {
 	var customError *errors.CustomError
 	user := &users.User{ID: userID}
 
