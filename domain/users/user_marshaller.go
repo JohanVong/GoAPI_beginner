@@ -2,13 +2,6 @@ package users
 
 import "encoding/json"
 
-// PublicUser is public info
-type PublicUser struct {
-	Username    string `json:"username"`
-	DateCreated string `json:"date_created"`
-	Status      string `json:"status"`
-}
-
 // PrivateUser is for authenticated user
 type PrivateUser struct {
 	ID          int64  `json:"id"`
@@ -22,26 +15,20 @@ type PrivateUser struct {
 }
 
 // Marshall for array of User
-func (users Users) Marshall(isPrivate bool) []interface{} {
+func (users Users) Marshall() []interface{} {
 	result := make([]interface{}, len(users))
 	for index, user := range users {
-		result[index] = user.Marshall(isPrivate)
+		result[index] = user.Marshall()
 	}
 	return result
 }
 
 // Marshall determines what type of user to return
-func (user *User) Marshall(isPrivate bool) interface{} {
+func (user *User) Marshall() interface{} {
 	var privateUser PrivateUser
-	var publicUser PublicUser
 
 	userJSON, _ := json.Marshal(user)
 	json.Unmarshal(userJSON, &privateUser) // Unmarshal(кого, куда)
-	json.Unmarshal(userJSON, &publicUser)
 
-	if isPrivate {
-		return privateUser
-	}
-
-	return publicUser
+	return privateUser
 }

@@ -92,7 +92,7 @@ func SelfGetUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, errors.NoError(user.Marshall(c.GetHeader("X-Private") == "true")))
+	c.JSON(http.StatusOK, errors.NoError(user.Marshall()))
 }
 
 // SelfUpdateUser is used to alter user
@@ -124,7 +124,7 @@ func SelfUpdateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, errors.NoError(result.Marshall(c.GetHeader("X-Private") == "true")))
+	c.JSON(http.StatusOK, errors.NoError(result.Marshall()))
 }
 
 // SelfDeleteUser is used to remove user from database
@@ -179,7 +179,7 @@ func SearchUsersByStatus(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, errors.NoError(userArray.Marshall(c.GetHeader("X-Private") == "true")))
+	c.JSON(http.StatusOK, errors.NoError(userArray.Marshall()))
 }
 
 // GetUserByID is used to get info about user
@@ -216,7 +216,7 @@ func GetUserByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, errors.NoError(user.Marshall(c.GetHeader("X-Private") == "true")))
+	c.JSON(http.StatusOK, errors.NoError(user.Marshall()))
 }
 
 // UpdateUserByID is used to alter user
@@ -259,7 +259,7 @@ func UpdateUserByID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, errors.NoError(result.Marshall(c.GetHeader("X-Private") == "true")))
+	c.JSON(http.StatusOK, errors.NoError(result.Marshall()))
 }
 
 // DeleteUserByID is used to remove user from database
