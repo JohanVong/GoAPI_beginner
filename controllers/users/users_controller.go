@@ -42,7 +42,7 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
-	token, customError = services.TokensService.CreateToken(uint(result.ID))
+	token, customError = services.TokensService.CreateToken(false, result.ID)
 	if customError != nil {
 		c.JSON(http.StatusBadRequest, errors.TextError("User is created without token", customError.Error))
 		return
@@ -69,7 +69,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, customError = services.TokensService.UpdateToken(user.ID)
+	token, customError = services.TokensService.CreateToken(true, user.ID)
 	if customError != nil {
 		c.JSON(http.StatusNotFound, errors.TextError("Failed to get a new token", customError.Error))
 		return

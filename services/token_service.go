@@ -16,9 +16,8 @@ type tokensService struct{}
 
 type tokensServiceInterface interface {
 	GetUserByToken(tokenstring string) (*users.User, *errors.CustomError)
-	CreateToken(userID uint) (string, *errors.CustomError)
+	CreateToken(update bool, userID uint) (string, *errors.CustomError)
 	DeleteToken(userID uint) *errors.CustomError
-	UpdateToken(userID uint) (string, *errors.CustomError)
 }
 
 // GetUserIDbyToken returns user by ID
@@ -47,43 +46,28 @@ func (t *tokensService) GetUserByToken(tokenstring string) (*users.User, *errors
 }
 
 //CreateToken is a func which takes ID of user and creates a token for this user
-func (t *tokensService) CreateToken(userID uint) (string, *errors.CustomError) {
+func (t *tokensService) CreateToken(update bool, userID uint) (string, *errors.CustomError) {
 	var customError *errors.CustomError
 	var token tokens.Token
 	var err error
 	var newToken string
 
-	newToken, err = webtoken.JWTCreate(userID, "global", 1)
+	newToken, err = webtoken.JWTCreate(userID, "global", 60)
 	if err != nil {
 		return "", errors.TextError("An error on JSON web token creation occurred", err.Error())
 	}
 
 	token.UserID = userID
 	token.Token = newToken
-	if customError = token.Insert(); customError != nil {
-		return "", customError
-	}
 
-	return newToken, nil
-}
-
-// UpdateToken is a func which takes userID and updates a token corresponding to it
-func (t *tokensService) UpdateToken(userID uint) (string, *errors.CustomError) {
-	var err error
-	var customError *errors.CustomError
-	var token tokens.Token
-	var newToken string
-
-	newToken, err = webtoken.JWTCreate(userID, "global", 1)
-	if err != nil {
-		return "", errors.TextError("An error on JSON web token creation occurred", err.Error())
-	}
-
-	token.Token = newToken
-	token.UserID = userID
-
-	if customError = token.Update(); customError != nil {
-		return "", customError
+	if update == true {
+		if customError = token.Update(); customError != nil {
+			return "", customError
+		}
+	} else {
+		if customError = token.Insert(); customError != nil {
+			return "", customError
+		}
 	}
 
 	return newToken, nil
