@@ -1,2 +1,2 @@
 # UsersAPI_byAlmaz
-My first API with Golang
+Users API with token authentication and admin functionality
